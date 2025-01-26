@@ -1,29 +1,54 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import DatasetUploadPage from "./pages/DatasetUploadPage";
 import ModelTrainingPage from "./pages/ModelTrainingPage";
 import Results from "./pages/Results";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check for authentication state on load
+    const authState = localStorage.getItem('isAuthenticated');
+    if (authState) {
+      setIsAuthenticated(JSON.parse(authState));
+    }
+  }, []);
+
   return (
-    <>
-    <div className="w-full overflow-x-hidden fixed z-10">
-      <Navbar/>
-    </div>
-    <div className="">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/DatasetUpload" element={<DatasetUploadPage />} />
-          <Route path="/ModelTraining" element={<ModelTrainingPage />} />
-          <Route path="/Results" element={<Results />} />
-        </Routes>
-      </Router>
-    </div>
-    </>
+    <Router>
+      <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/DatasetUpload"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <DatasetUploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ModelTraining"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ModelTrainingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Results"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Results />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 
